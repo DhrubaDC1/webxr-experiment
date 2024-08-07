@@ -35,11 +35,8 @@ function init() {
     cube = new THREE.Mesh(geometry, material);
     scene.add(cube);
 
-
-    // Add Directional Light
-    directionalLight = new THREE.DirectionalLight(0xFF0000, 10);
-    directionalLight.position.set(0, camera.position.y, 0).normalize();
-    scene.add(directionalLight);
+    light = new THREE.HemisphereLight( 0xffffff, 0xffffff, 1 );
+    scene.add( light ); 
 
     // Add an XR button
     const vrButton = VRButton.createButton(renderer);
