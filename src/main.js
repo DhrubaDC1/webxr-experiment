@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { RectAreaLightHelper } from 'three/examples/jsm/Addons.js';
 
 
 
@@ -31,12 +32,23 @@ function init() {
 
     // Add a cube to the scene
     const geometry = new THREE.BoxGeometry();
-    const material = new THREE.MeshPhongMaterial({ map: texture });
+    const material = new THREE.MeshStandardMaterial({ map: texture });
     cube = new THREE.Mesh(geometry, material);
     scene.add(cube);
 
-    light = new THREE.HemisphereLight( 0xffffff, 0xffffff, 1 );
+    light = new THREE.RectAreaLight( 0x00ffff, 10,  5, 5 );
+    light.position.set( 2, 2, 0 );
+    light.lookAt( 0, 0, 0 );
     scene.add( light ); 
+    let light2 = new THREE.RectAreaLight( 0xff0000, 10,  5, 5 );
+    light2.position.set( -2, -3, 0 );
+    light2.lookAt( 0, 0, 0 );
+    light2.rotateX(1)
+    scene.add(light2)
+    const rectLightHelper = new RectAreaLightHelper( light );
+light.add( rectLightHelper );
+    const rectLightHelper2 = new RectAreaLightHelper( light2 );
+light2.add( rectLightHelper2 );
 
     // Add an XR button
     const vrButton = VRButton.createButton(renderer);
