@@ -23,6 +23,8 @@ function init() {
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.xr.enabled = true;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
     document.body.appendChild(renderer.domElement);
 
     // Add orbit controls
@@ -34,26 +36,62 @@ function init() {
     const geometry = new THREE.BoxGeometry();
     const material = new THREE.MeshStandardMaterial({ map: texture });
     cube = new THREE.Mesh(geometry, material);
-    cube.castShadow = true;
-    cube.receiveShadow = true;
+    cube.position.setY(0.5)
+    cube.castShadow = true; //default is false
+    cube.receiveShadow = false; //default
     scene.add(cube);
+
+    // Add a white floor to the scene
+    const floorGeometry = new THREE.PlaneGeometry(10, 10);
+    const floorMaterial = new THREE.MeshStandardMaterial({ color: 0xFFFFFF, side: THREE.DoubleSide });
+    const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+    floor.rotation.x = -Math.PI / 2; // Rotate the floor to be horizontal
+    floor.position.y = -0.5; // Position the floor under the cube
+    floor.receiveShadow = true
+    scene.add(floor);
+    // Add a white floor to the scene
+    const floor2 = new THREE.Mesh(floorGeometry, floorMaterial);
+    floor2.rotation.x = -Math.PI / 2; // Rotate the floor to be horizontal
+    floor2.position.y = -0.5; // Position the floor under the cube
+    floor2.receiveShadow = true
+    floor.rotation.y = 1.5
+    floor.position.x = 2
+    scene.add(floor2);
+
+    // Add ambient light
+    scene.add(new THREE.AmbientLight(0xffffff, 0.1));
+
 
     light = new THREE.SpotLight(0xff0000, 20);
     light.position.set(2, 2, 0);
     light.castShadow = true;
     scene.add(light);
 
+    //Set up shadow properties for the light
+light.shadow.mapSize.width = 512; // default
+light.shadow.mapSize.height = 512; // default
+light.shadow.camera.near = 0.5; // default
+light.shadow.camera.far = 500; // default
+light.shadow.focus = 1; // default
+
     light2 = new THREE.SpotLight(0x00ffff, 20);
     light2.position.set(-2, -2, 0);
     light2.castShadow = true;
     scene.add(light2);
 
-    // Add spotlight helper
-    spotLightHelper = new THREE.SpotLightHelper(light);
-    scene.add(spotLightHelper);
-    // Add spotlight helper
-    spotLightHelper2 = new THREE.SpotLightHelper(light2);
-    scene.add(spotLightHelper2);
+//     //Set up shadow properties for the light
+// light2.shadow.mapSize.width = 0; // default
+// light2.shadow.mapSize.height = 0; // default
+// light2.shadow.camera.near = 0.2; // default
+// light2.shadow.camera.far = 100; // default
+// light2.shadow.focus = 0.2; // default
+
+    // // Add spotlight helper
+    // spotLightHelper = new THREE.SpotLightHelper(light);
+    // scene.add(spotLightHelper);
+    // // Add spotlight helper
+    // spotLightHelper2 = new THREE.SpotLightHelper(light2);
+    // scene.add(spotLightHelper2);
     // Add an XR button
     const vrButton = VRButton.createButton(renderer);
     document.body.appendChild(vrButton);
