@@ -34,22 +34,26 @@ function init() {
     const geometry = new THREE.BoxGeometry();
     const material = new THREE.MeshStandardMaterial({ map: texture });
     cube = new THREE.Mesh(geometry, material);
+    cube.castShadow = true;
+    cube.receiveShadow = true;
     scene.add(cube);
 
-    light = new THREE.RectAreaLight( 0x00ffff, 10,  5, 5 );
-    light.position.set( 2, 2, 0 );
-    light.lookAt( 0, 0, 0 );
-    scene.add( light ); 
-    let light2 = new THREE.RectAreaLight( 0xff0000, 10,  5, 5 );
-    light2.position.set( -2, -3, 0 );
-    light2.lookAt( 0, 0, 0 );
-    light2.rotateX(1)
-    scene.add(light2)
-    const rectLightHelper = new RectAreaLightHelper( light );
-light.add( rectLightHelper );
-    const rectLightHelper2 = new RectAreaLightHelper( light2 );
-light2.add( rectLightHelper2 );
+    light = new THREE.SpotLight(0xff0000, 20);
+    light.position.set(2, 2, 0);
+    light.castShadow = true;
+    scene.add(light);
 
+    light2 = new THREE.SpotLight(0x00ffff, 20);
+    light2.position.set(-2, -2, 0);
+    light2.castShadow = true;
+    scene.add(light2);
+
+    // Add spotlight helper
+    spotLightHelper = new THREE.SpotLightHelper(light);
+    scene.add(spotLightHelper);
+    // Add spotlight helper
+    spotLightHelper2 = new THREE.SpotLightHelper(light2);
+    scene.add(spotLightHelper2);
     // Add an XR button
     const vrButton = VRButton.createButton(renderer);
     document.body.appendChild(vrButton);
