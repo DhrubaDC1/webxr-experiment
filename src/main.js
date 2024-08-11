@@ -1,79 +1,87 @@
 import * as THREE from 'three';
 import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { RectAreaLightHelper } from 'three/examples/jsm/Addons.js';
+import { GLTFLoader, RectAreaLightHelper } from 'three/examples/jsm/Addons.js';
 
 
+init();
+animate();
 
 function init() {
     console.log("Initializing...");
 
     // Set up the scene
     scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x000000);
 
     // Set up the camera
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(-1.55, 0.71, 1.01)
+    camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 0.01, 1000);
+    camera.position.set(0, 18, 40);
 
-    
-    const texture = new THREE.TextureLoader().load( 'crate.gif' );
-    texture.colorSpace = THREE.SRGBColorSpace;
+    const light_ambient = new THREE.AmbientLight(0xffffff, 1);
+    scene.add(light_ambient);
+
+    var light_directional_left = new THREE.DirectionalLight(0x99aaff, 1.6)
+    light_directional_left.position.set(-1, 0, 1)
+    scene.add(light_directional_left);
+
+    var light_directional_right = new THREE.DirectionalLight(0xff5522, 2)
+    light_directional_right.position.set(2, -1, 1)
+    scene.add(light_directional_right);
+
+    // LOAD A MAP TO SWAP ---->. TYPE "noggin.material.map= nogginMap2" IN CONSOLE
+    texture = new THREE.TextureLoader().load("./maps/girlMapDotNose.jpg");
+    nogginMap2 = texture;
+    const loader = new GLTFLoader();
+    loader.load("./glb/06_01_exportTest.glb", function (gltf) {
+        const model = gltf.scene;
+        body = gltf.scene.getObjectByName("Armature");
+        noggin = body.children[9];
+        scene.add(model);
+    });
+
+    // const texture = new THREE.TextureLoader().load('crate.gif');
+    // texture.colorSpace = THREE.SRGBColorSpace;
 
     // Set up the renderer
     renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.outputEncoding = THREE.sRGBEncoding;
     renderer.xr.enabled = true;
     document.body.appendChild(renderer.domElement);
+
+    window.addEventListener('resize', onWindowResize, false);
 
     // Add orbit controls
     controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true; // Add smooth damping effect
     controls.dampingFactor = 0.05;
 
-    // Add a cube to the scene
-    const geometry = new THREE.BoxGeometry();
-    const material = new THREE.MeshStandardMaterial({ map: texture });
-    cube = new THREE.Mesh(geometry, material);
-    cube.castShadow = true;
-    cube.receiveShadow = true;
-    scene.add(cube);
-
-    light = new THREE.SpotLight(0xff0000, 20);
-    light.position.set(2, 2, 0);
-    light.castShadow = true;
-    scene.add(light);
-
-    light2 = new THREE.SpotLight(0x00ffff, 20);
-    light2.position.set(-2, -2, 0);
-    light2.castShadow = true;
-    scene.add(light2);
-
-    // Add spotlight helper
-    spotLightHelper = new THREE.SpotLightHelper(light);
-    scene.add(spotLightHelper);
-    // Add spotlight helper
-    spotLightHelper2 = new THREE.SpotLightHelper(light2);
-    scene.add(spotLightHelper2);
     // Add an XR button
     const vrButton = VRButton.createButton(renderer);
     document.body.appendChild(vrButton);
 
     console.log("VR Button added:", vrButton);
 
-    // Start the render loop
-    renderer.setAnimationLoop(render);
-
     // Add VR session start and end event listeners
     renderer.xr.addEventListener('sessionstart', onSessionStart);
     renderer.xr.addEventListener('sessionend', onSessionEnd);
 }
 
-function render() {
-    // Rotate the cube for some basic animation
-    // cube.rotation.x += 0.01;
-    // cube.rotation.y += 0.01;
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
 
-    // Render the scene
+var lastTime, dmax = dts = 0.016;
+function animate(now) {
+    if (lastTime)
+        dts = Math.min(dmax, (now - lastTime) / 1000);
+    lastTime = now;
+    requestAnimationFrame(animate);
+
     renderer.render(scene, camera);
 }
 
@@ -84,13 +92,3 @@ function onSessionStart() {
 function onSessionEnd() {
     console.log('VR session ended');
 }
-
-// Initialize the scene when the page loads
-window.onload = init;
-
-// Handle window resizing
-window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-});
