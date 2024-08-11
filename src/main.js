@@ -1,8 +1,8 @@
-// import * as THREE from 'three';
+import * as THREE from 'three';
 import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
-// import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { RectAreaLightHelper } from 'three/examples/jsm/Addons.js';
-// import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 const panoSphereGeo = new THREE.SphereGeometry(6, 16, 16);
 
@@ -11,7 +11,7 @@ const panoSphereMat = new THREE.MeshStandardMaterial({
 	side: THREE.BackSide,
 	displacementScale: - 4.0
 });
-
+// THREE.ColorManagement.enabled = false
 // Create the panoramic sphere mesh
 sphere = new THREE.Mesh(panoSphereGeo, panoSphereMat);
 init()
@@ -41,23 +41,9 @@ function init() {
 		texture.minFilter = THREE.NearestFilter;
 		texture.generateMipmaps = false;
 		texture.anisotropy = 16
+        texture.encoding = THREE.LinearEncoding;
 		sphere.material.map = texture;
- // Ensure the image is fully loaded before accessing its properties
- texture.image.onload = function() {
-    // Create the cube render target to extract environment map from the 360° texture
-    const rt = new THREE.WebGLCubeRenderTarget(texture.image.height);
-    rt.fromEquirectangularTexture(renderer, texture);
-    scene.background = rt.texture;
-
-    // Create a LightProbe from the environment texture
-    const lightProbe = new THREE.LightProbe();
-    lightProbe.intensity = 100
-    lightProbe.copy(new THREE.LightProbe().fromCubeTexture(rt.texture));
-    scene.add(lightProbe);
-
-    console.log("Environment map and light probe added.");
-};
-	});
+    });
 
 	// On load complete add the panoramic sphere to the scene
 	manager.onLoad = function () {
@@ -76,24 +62,26 @@ function init() {
     camera.position.set(80,9,48)
 
     // Add ambient light
-    const light_ambient = new THREE.AmbientLight(0xffffff, 0.3  );
+    const light_ambient = new THREE.AmbientLight(0xffffff, 0.8  );
     scene.add(light_ambient);
   
-    var light_directional_left = new THREE.DirectionalLight(0xff5522, 2)
+    var light_directional_left = new THREE.DirectionalLight(0xff5522, 3)
     light_directional_left.position.set(-1 , 0, 10)
     scene.add(light_directional_left);
   
-    var light_directional_right = new THREE.DirectionalLight(0x99aaff, 2)
+    var light_directional_right = new THREE.DirectionalLight(0x99aaff, 3)
     light_directional_right.position.set(6, 2, -2)
     scene.add(light_directional_right);
   
     
 
     texture = new THREE.TextureLoader().load( "src/maps/girlMapDotNose.jpg" );
+    texture.encoding = THREE.LinearEncoding
     nogginMap2 = texture;
-    const loader = new THREE.GLTFLoader();
+    const loader = new GLTFLoader();
           loader.load("src/glb/06_01_exportTest.glb", function (gltf) { 
     model = gltf.scene;
+
     body = gltf.scene.getObjectByName("Armature");
     noggin = body.children[9]; 
     model.rotation.y = 1
@@ -104,12 +92,19 @@ function init() {
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.outputEncoding = THREE.sRGBEncoding;
+    // renderer.outputColorSpace = THREE.sRGBEncoding;
+    // renderer.outputEncoding = THREE.LinearEncoding; // Disable sRGB encoding
+    // renderer.toneMapping = THREE.NoToneMapping;    // Disable tone mapping
+
+    // renderer.gammaFactor = 2.2;  // Adjust gamma factor
+    // renderer.gammaOutput = true; // Enable gamma output
+
+
     renderer.xr.enabled = true;
     document.body.appendChild(renderer.domElement);
 
     // Add orbit controls
-    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    const controls = new OrbitControls(camera, renderer.domElement);
     controls.target.set(0, 12, 0);
     controls.update();
 
