@@ -1,8 +1,8 @@
-import * as THREE from 'three';
+// import * as THREE from 'three';
 import { VRButton } from 'three/examples/jsm/webxr/VRButton.js';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+// import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { RectAreaLightHelper } from 'three/examples/jsm/Addons.js';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+// import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 
 init()
@@ -14,7 +14,6 @@ function init() {
 
     // Set up the scene
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x000000);
     // Set up the camera
     camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.01, 1000);
     camera.position.set(0, 18, 40);
@@ -30,10 +29,19 @@ function init() {
     var light_directional_right = new THREE.DirectionalLight(0xff5522, 2)
     light_directional_right.position.set(2, -1, 1)
     scene.add(light_directional_right);
+
+    let rectAreaLight = new THREE.RectAreaLight(0x0000ff, 100, 30, 30);
+    rectAreaLight.position.set(0, 30, 0);
+    rectAreaLight.rotation.x = Math.PI / 2;
+    scene.add(rectAreaLight);
+
+    // light helper
+    const lightHelper = new RectAreaLightHelper(rectAreaLight);
+    scene.add(lightHelper);
     
     texture = new THREE.TextureLoader().load( "src/maps/girlMapDotNose.jpg" );
     nogginMap2 = texture;
-    const loader = new GLTFLoader();
+    const loader = new THREE.GLTFLoader();
           loader.load("src/glb/06_01_exportTest.glb", function (gltf) { 
     const model = gltf.scene;
     body = gltf.scene.getObjectByName("Armature");
@@ -50,7 +58,7 @@ function init() {
     document.body.appendChild(renderer.domElement);
 
     // Add orbit controls
-    const controls = new OrbitControls(camera, renderer.domElement);
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.target.set(0, 12, 0);
     controls.update();
 
